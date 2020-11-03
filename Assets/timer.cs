@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEditor;
+//using UnityEditor;
 
 public class timer : MonoBehaviour
 {
@@ -11,6 +12,8 @@ public class timer : MonoBehaviour
  public float time1, time2, activeTimeLeft, intervalTimeLeft;
  public int timerState = 0,num, setNumberInput, numout;
  public bool isActivePhase = true;
+ public AudioClip beep;
+ AudioSource audioSource;
 
     void Start()
     {
@@ -52,7 +55,8 @@ public class timer : MonoBehaviour
 			if ( isActivePhase ){
 				if(activeTimeLeft <= 0){
 					//Action of phase changing is written in this section
-					EditorApplication.Beep();
+					audioSource.PlayOneShot(beep);
+					//EditorApplication.Beep();
 					isActivePhase = false;
 					activeTimeLeft = time1;
 					activeTimeText.text = activeTimeLeft.ToString("00");
@@ -70,7 +74,8 @@ public class timer : MonoBehaviour
 			if ( !isActivePhase ){
 				if(intervalTimeLeft <= 0){
 					//Action of phase changing is written in this section
-					EditorApplication.Beep();
+					audioSource.PlayOneShot(beep);
+					//EditorApplication.Beep();
 					isActivePhase = true;
 					--numout;
 					intervalTimeLeft = time2;
