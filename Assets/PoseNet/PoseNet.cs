@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using System;
+
 namespace TensorFlowLite
 {
 
@@ -191,6 +193,80 @@ namespace TensorFlowLite
             return argMaxResults;
         }
 
+
+        /////////////// add function ///////////////
+        public static double GetAngular(double ax,double ay,double bx,double by,double cx,double cy)
+        {
+            // 内積から角度を計算
+            double vectorA_x = ax - bx;
+            double vectorA_y = ay - by;
+            double vectorC_x = cx - bx;
+            double vectorC_y = cy - by;
+            // caluculate inner product
+            double naiseki = vectorA_x * vectorC_x + vectorA_y * vectorC_y;
+            double normAB = Math.Sqrt(Math.Pow(vectorA_x,2) + Math.Pow(vectorA_y,2));
+            double normCB = Math.Sqrt(Math.Pow(vectorC_x,2) + Math.Pow(vectorC_y,2));
+            double angular = Math.Acos(naiseki / normAB / normCB) * 180 / 3.141;
+            
+            return angular;
+        }
+
+        public static double CheckCrunchi(Result[] a)
+        {
+            // a reult型　の結果データ
+            // クランチ 右尻12 右ひざ14 右足首16
+            // 左尻　11 左膝14　左足首15
+            // 0.5f しきい値
+            // 足の角度が 100 ~ 80 = 1 110 ~ 70 = 0.8 
+            double angle = -1;
+            if (a[13].confidence > 0.5f && a[14].confidence > 0.5f && a[16].confidence > 0.5f){
+                angle = GetAngular(a[12].x,a[12].y,a[14].x,a[14].y,a[16].x,a[16].y);
+            }
+            else if (a[11].confidence > 0.5f && a[13].confidence > 0.5f && a[15].confidence > 0.5f){
+                angle = GetAngular(a[11].x,a[11].y,a[13].x,a[13].y,a[15].x,a[15].y);
+            }
+            else {
+                //体が写ってないとき
+                angle = -1;
+            }
+
+            // 体が写って無いときは０
+            // 足の角度が 100 ~ 80 = 1 110 ~ 70 = 0.8　それ以外　0.5
+            if (angle > 110) return 0.5f;
+            else if (angle > 100) return 0.8f;
+            else if (angle < 70 && angle > 0) return -0.5f;
+            else if (angle < 80 && angle > 0) return -0.8f;
+            else if (angle>=80 && angle <= 100) return 1;
+            else return 0;
+        }
+        public static int CountCrunchi(Result[] a){
+            //左肩　5　左尻11
+            //右肩　６　右尻１２
+            // 肩が上がってる１　下がってる　－１　そもそも見えない　０
+            double threshould = 0.5f;
+            if (a[5].confidence > threshould && a[11].confidence > threshould)
+            {
+                if(a[5].y > (a[11].y+10)){
+                    return 1;
+                }
+                else{
+                    return -1;
+                }
+            }
+            else if (a[6].confidence > threshould && a[12].confidence > threshould)
+            {
+                if(a[6].y > (a[12].y+10)){
+                    return 1;
+                }
+                else{
+                    return -1;
+                }
+            }
+            else{
+                return 0;
+            }
+        }
+        ///////////////////////////////////////////////////////////////////
 
     }
 }

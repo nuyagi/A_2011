@@ -19,11 +19,31 @@ public class PoseNetSample : MonoBehaviour
 
     public PoseNet.Result[] results;
 
+    //////////////////////////////////////
+    // 音声出力用///////
+    public AudioClip sound1;
+    // 1 あし　たかい　２　あしひくい 3なにも写っていない
+    public AudioClip sound2;
+    public AudioClip sound3;
+    AudioSource audioSource;
+    ///////////////////////
+    // 平均用カウンター counter
+    // flame counter %60 で割る
+    ulong counter=0;
+    //ulong flamecounter = 0;
+    double score = 0;
+    //double[] ScoreList 
+    ///////////////////////////////////////
+
+    //
     void Start()
     {
         string path = Path.Combine(Application.streamingAssetsPath, fileName);
         poseNet = new PoseNet(path);
-
+        /////////////////////////////////////
+        //audio Componentを取得 足した
+        audioSource = GetComponent<AudioSource>();
+        /////////////////////////////////////
         // Init camera
         string cameraName = WebCamUtil.FindName();
         webcamTexture = new WebCamTexture(cameraName, 640, 480, 30);
@@ -50,7 +70,29 @@ public class PoseNetSample : MonoBehaviour
 
         cameraView.material = poseNet.transformMat;
         // cameraView.texture = poseNet.inputTex;
-
+        //////////////// add (sugawara)//////////////
+        score = PoseNet.CheckCrunchi(results);
+        Debug.Log(score);
+        if (counter < 60){
+            counter += 1;
+        }
+        // score ! = 1 なら発音
+        if (counter >= 60){
+            counter = 0;
+            if (score ==1){
+                // 何もしない
+            }
+            else if(score>0){
+            audioSource.PlayOneShot(sound1);
+            }
+            else if (score<0) {
+                audioSource.PlayOneShot(sound2);
+            }
+            else {
+                audioSource.PlayOneShot(sound3);
+            }
+        }
+        ///////////////////////////////////////////
         DrawResult();
     }
 

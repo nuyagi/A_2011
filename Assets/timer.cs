@@ -62,8 +62,8 @@ public class timer : MonoBehaviour
 					activeTimeLeft -= Time.deltaTime; 
 				}
 				if(timerState == 2){
-					while(timerState == 2){
-					}
+					//while(timerState == 2){
+					//}
 				}
 				activeTimeText.text = activeTimeLeft.ToString("00");
 			}
@@ -82,8 +82,8 @@ public class timer : MonoBehaviour
 					intervalTimeLeft -= Time.deltaTime; 
 				}
 				if(timerState == 2){
-					while(timerState == 2){
-					}
+					//while(timerState == 2){
+					//}
 				}
 				intervalTimeText.text = intervalTimeLeft.ToString("00");
 			}
