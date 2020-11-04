@@ -5,12 +5,12 @@ using UnityEngine;
 using UnityEngine.UI;
 //using UnityEditor;
 
-public class timer : MonoBehaviour
+public class TimerScript : MonoBehaviour
 {
  public Text activeTimeText, intervalTimeText, setsNumberText;
  public float activeTimeInput, intervalTimeInput;
  public float time1, time2, activeTimeLeft, intervalTimeLeft;
- public int timerState = 0,num, setNumberInput, numout;
+ public int timerState = 0,num, setNumberInput, numberOfSetsLeft;
  public bool isActivePhase = true;
  public AudioClip beep;
  AudioSource audioSource;
@@ -43,86 +43,91 @@ public class timer : MonoBehaviour
 	
 	public void repeat(int setNumberInput){
 		num = setNumberInput;
-		numout = num;
-		setsNumberText.text = numout.ToString("00");
+		numberOfSetsLeft = num;
+		setsNumberText.text = numberOfSetsLeft.ToString("00");
 	}
-		
-	
 
-    void Update()
-    {
-		if(timerState != 0){
-			if ( isActivePhase ){
-				if(activeTimeLeft <= 0){
-					//Action of phase changing is written in this section
-					audioSource.PlayOneShot(beep);
-					//EditorApplication.Beep();
-					isActivePhase = false;
-					activeTimeLeft = time1;
-					activeTimeText.text = activeTimeLeft.ToString("00");
-					goto campaign;
-				}
-				if(timerState == 1){
-					activeTimeLeft -= Time.deltaTime; 
-				}
-				if(timerState == 2){
-					while(timerState == 2){
-						if(timerState != 2){
-							break;
-						}
-					}
-				}
-				activeTimeText.text = activeTimeLeft.ToString("00");
-			}
-			if ( !isActivePhase ){
-				if(intervalTimeLeft <= 0){
-					//Action of phase changing is written in this section
-					audioSource.PlayOneShot(beep);
-					//EditorApplication.Beep();
-					isActivePhase = true;
-					--numout;
-					intervalTimeLeft = time2;
-					setsNumberText.text = numout.ToString("00");
-					intervalTimeText.text = intervalTimeLeft.ToString("00");
-					goto campaign;
-				}
-				if(timerState == 1){
-					intervalTimeLeft -= Time.deltaTime; 
-				}
-				if(timerState == 2){
-					while(timerState == 2){
-						if(timerState != 2){
-							break;
-						}
-					}
-				}
-				intervalTimeText.text = intervalTimeLeft.ToString("00");
-			}
-		}
-
-campaign:;
-		if(numout <= 0){
-			//Finishing acctions should be written here
-			cease();
-		}
-    }
-
-    public void begin(){
+	public void begin(){
 		timerState = 1;
 		isActivePhase = true;
     }
 
     public void cease(){
 		timerState = 0;
-		numout = num;
+		numberOfSetsLeft = num;
 		activeTimeLeft = time1;
 		intervalTimeLeft = time2;
-		setsNumberText.text = numout.ToString("00");
+		setsNumberText.text = numberOfSetsLeft.ToString("00");
 		activeTimeText.text = activeTimeLeft.ToString("00");
 		intervalTimeText.text = intervalTimeLeft.ToString("00");
 	}
 
     public void pause(){
-		if(timerState == 2){timerState = 1;}else{timerState = 2;}
+		if(timerState == 2){timerState = 1;}
+		else if(timerState == 1){timerState = 2;}
+		else{timerState = 0;}
     }
+	
+	
+
+    void Update()
+    {
+		/*
+		if(timerState != 0){
+			if ( isActivePhase ){
+				if(activeTimeLeft <= 0){
+					//Action of phase changing is written in this section
+					//audioSource.PlayOneShot(beep);
+					isActivePhase = false;
+					activeTimeLeft = time1;
+					activeTimeText.text = activeTimeLeft.ToString("00");
+					goto campaign;
+				}
+				if(timerState == 1){
+					if(Time.timeScale == 0){
+						Time.timeScale = 1.0f;
+					}
+					activeTimeLeft -= Time.deltaTime; 
+					activeTimeText.text = activeTimeLeft.ToString("00");
+				}
+				if(timerState == 2){
+					Time.timeScale = 0;
+				}
+				activeTimeText.text = activeTimeLeft.ToString("00");
+			}
+			if ( !isActivePhase ){
+				if(intervalTimeLeft <= 0){
+					//Action of phase changing is written in this section
+					//audioSource.PlayOneShot(beep);
+					isActivePhase = true;
+					--numberOfSetsLeft;
+					intervalTimeLeft = time2;
+					setsNumberText.text = numberOfSetsLeft.ToString("00");
+					intervalTimeText.text = intervalTimeLeft.ToString("00");
+					goto campaign;
+				}
+				if(timerState == 1){
+					if(Time.timeScale == 0){
+						Time.timeScale = 1.0f;
+					}
+					intervalTimeLeft -= Time.deltaTime; 
+					intervalTimeText.text = intervalTimeLeft.ToString("00");
+				}
+				if(timerState == 2){
+					Time.timeScale = 0;
+				}
+				intervalTimeText.text = intervalTimeLeft.ToString("00");
+			}
+		}
+
+campaign:;
+		if(numberOfSetsLeft <= 0){
+			//Finishing acctions should be written here
+			cease();
+		}
+		*/
+    }
+	
+
+    
 }
