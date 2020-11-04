@@ -32,7 +32,11 @@ public class PoseNetSample : MonoBehaviour
     ulong counter=0;
     //ulong flamecounter = 0;
     double score = 0;
-    //double[] ScoreList 
+    //double[] ScoreList
+    //スコア用
+    public GameObject score_object = null;
+    double  totalscore = 0;
+    bool FlagStartStop = false;
     ///////////////////////////////////////
 
     //
@@ -43,6 +47,9 @@ public class PoseNetSample : MonoBehaviour
         /////////////////////////////////////
         //audio Componentを取得 足した
         audioSource = GetComponent<AudioSource>();
+        //flag 初期化
+        FlagStartStop = false;
+
         /////////////////////////////////////
         // Init camera
         string cameraName = WebCamUtil.FindName();
@@ -63,6 +70,17 @@ public class PoseNetSample : MonoBehaviour
         draw?.Dispose();
     }
 
+    ////////////////////////
+    public void OnClick() {
+        if (FlagStartStop==false){
+            FlagStartStop = true;
+        }
+        else {
+            FlagStartStop = false;
+        }
+    }
+    ///////////////////////////
+
     void Update()
     {
         poseNet.Invoke(webcamTexture);
@@ -72,12 +90,12 @@ public class PoseNetSample : MonoBehaviour
         // cameraView.texture = poseNet.inputTex;
         //////////////// add (sugawara)//////////////
         score = PoseNet.CheckCrunchi(results);
-        Debug.Log(score);
-        if (counter < 60){
+        //Debug.Log(score);
+        if (counter < 120){
             counter += 1;
         }
         // score ! = 1 なら発音
-        if (counter >= 60){
+        if (counter >= 120){
             counter = 0;
             if (score ==1){
                 // 何もしない
@@ -92,6 +110,16 @@ public class PoseNetSample : MonoBehaviour
                 audioSource.PlayOneShot(sound3);
             }
         }
+        //スコアを加算
+        if (FlagStartStop){
+            if (counter == 60 || counter == 120){
+                totalscore+=score;
+                //totalscore +=1;
+            }
+        }
+        Text score_text = score_object.GetComponent<Text> ();
+        // テキストの表示を入れ替える
+        score_text.text = "Score:" +totalscore;
         ///////////////////////////////////////////
         DrawResult();
     }
