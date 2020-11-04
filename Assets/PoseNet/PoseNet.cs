@@ -13,6 +13,9 @@ namespace TensorFlowLite
     /// </summary>
     public class PoseNet : BaseImagePredictor<float>
     {
+
+        //閾値
+        private static double threshould = 0.5f;
         public enum Part
         {
             NOSE,
@@ -243,10 +246,11 @@ namespace TensorFlowLite
             //左肩　5　左尻11
             //右肩　６　右尻１２
             // 肩が上がってる１　下がってる　－１　そもそも見えない　０
+            // 座標20　で感知
             double threshould = 0.5f;
             if (a[5].confidence > threshould && a[11].confidence > threshould)
             {
-                if(a[5].y > (a[11].y+10)){
+                if(a[5].x > (a[11].x+0.2)){
                     return 1;
                 }
                 else{
@@ -255,7 +259,22 @@ namespace TensorFlowLite
             }
             else if (a[6].confidence > threshould && a[12].confidence > threshould)
             {
-                if(a[6].y > (a[12].y+10)){
+                if(a[6].x > (a[12].x+0.2)){
+                    return 1;
+                }
+                else{
+                    return -1;
+                }
+            }
+            else{
+                return 0;
+            }
+        }
+        public static int CountNose(Result[] a){
+            //テスト用
+            if (a[0].confidence > threshould)
+            {
+                if(a[0].x > 0.5){
                     return 1;
                 }
                 else{
