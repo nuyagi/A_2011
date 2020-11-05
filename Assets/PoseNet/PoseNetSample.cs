@@ -27,12 +27,24 @@ public class PoseNetSample : MonoBehaviour
     public AudioClip sound3;
     AudioSource audioSource;
     ///////////////////////
-    // 平均用カウンター counter
+    ////クランチ用////////////////
+    ulong CrunchiIntervalCounter = 5;
+    //クランチのフラグ　上体が上がってるときtrue 下がってるときfalse
+    bool CrunchiFlag = false;
+    // 上体起こし関数の返り値を格納
+    int ReturnCountCrunchi = -1;
+    // スコアフラグ　true のときだけ加算
+    bool CrunchiScoreFlag = false;
+    //////////////////////// 
     // flame counter %60 で割る
     ulong counter=0;
     //ulong flamecounter = 0;
     double score = 0;
-    //double[] ScoreList 
+    //double[] ScoreList
+    //スコア用
+    public GameObject score_object = null;
+    double  totalscore = 0;
+    bool FlagStartStop = false;
     ///////////////////////////////////////
 
     //
@@ -43,6 +55,9 @@ public class PoseNetSample : MonoBehaviour
         /////////////////////////////////////
         //audio Componentを取得 足した
         audioSource = GetComponent<AudioSource>();
+        //flag 初期化
+        FlagStartStop = false;
+
         /////////////////////////////////////
         // Init camera
         string cameraName = WebCamUtil.FindName();
@@ -63,6 +78,17 @@ public class PoseNetSample : MonoBehaviour
         draw?.Dispose();
     }
 
+    ////////////////////////
+    public void OnClick() {
+        if (FlagStartStop==false){
+            FlagStartStop = true;
+        }
+        else {
+            FlagStartStop = false;
+        }
+    }
+    ///////////////////////////
+
     void Update()
     {
         poseNet.Invoke(webcamTexture);
@@ -71,13 +97,15 @@ public class PoseNetSample : MonoBehaviour
         cameraView.material = poseNet.transformMat;
         // cameraView.texture = poseNet.inputTex;
         //////////////// add (sugawara)//////////////
+        // クランチの姿勢をチェック
         score = PoseNet.CheckCrunchi(results);
-        Debug.Log(score);
-        if (counter < 60){
+        //Debug.Log(score);
+        //Debug.Log(results[0].x);
+        if (counter < 120){
             counter += 1;
         }
         // score ! = 1 なら発音
-        if (counter >= 60){
+        if (counter >= 120){
             counter = 0;
             if (score ==1){
                 // 何もしない
@@ -92,6 +120,45 @@ public class PoseNetSample : MonoBehaviour
                 audioSource.PlayOneShot(sound3);
             }
         }
+        // クランチの上体起こしをチェック
+        // return crunchi 肩が上がってる１　下がってる　－１　そもそも見えない　０
+        // crunchiFlag pc 内部での上体　true 上がってる　false 下がってる
+        ReturnCountCrunchi = PoseNet.CountCrunchi(results);
+        //Debug.Log(ReturnCountCrunchi);
+        if(CrunchiIntervalCounter > 0){
+            CrunchiIntervalCounter -=1;
+        }
+        if(CrunchiIntervalCounter<1){
+            Debug.Log("a");
+            if(ReturnCountCrunchi==1){
+                //肩が上がってるとき
+                if(CrunchiFlag == true){}
+                else{
+                    CrunchiFlag = true;
+                    CrunchiIntervalCounter = 10;
+                    CrunchiScoreFlag = true;
+                }
+            }
+            else if (ReturnCountCrunchi==-1){
+                if(CrunchiFlag == true){
+                    CrunchiFlag = false;
+                    CrunchiIntervalCounter = 10;
+                }
+            }
+            else{}
+        }
+        //スコアを加算
+        if (FlagStartStop==true && CrunchiScoreFlag ==true){
+            
+            totalscore+=System.Math.Abs(score)*10;
+            //totalscore +=1;
+        }
+        //毎回falseにする 大体常に
+        CrunchiScoreFlag = false;
+        //テキスト表示
+        Text score_text = score_object.GetComponent<Text> ();
+        // テキストの表示を入れ替える
+        score_text.text = "Score:" +totalscore;
         ///////////////////////////////////////////
         DrawResult();
     }
