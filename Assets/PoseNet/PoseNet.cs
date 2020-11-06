@@ -285,6 +285,59 @@ namespace TensorFlowLite
                 return 0;
             }
         }
+        public static double CheckSquat(Result[] a)
+        {
+            // a reult型　の結果データ
+            // スクワット 右尻12 右ひざ14 右足首16
+            // 左尻　11 左膝13　左足首15
+            // 0.5f しきい値
+            // x座標の差を見る 
+            double difference = -1;
+            if (a[12].confidence > 0.5f && a[14].confidence > 0.5f && a[16].confidence > 0.5f){
+                difference = System.Math.Abs(a[14].x-a[16].x);
+            }
+            else if (a[11].confidence > 0.5f && a[13].confidence > 0.5f && a[15].confidence > 0.5f){
+                difference = System.Math.Abs(a[13].x-a[15].x);
+            }
+            else {
+                //体が写ってないとき
+                difference = -1;
+            }
+
+            // 体が写って無いときは-1
+            // ずれが許容範囲　１　大きすぎ　０
+            if (difference > 0.2) return 0;
+            else if (difference <= 0.2  && difference >= 0) return 1;
+            else return -1;
+        }
+        public static int CountSquat(Result[] a){
+            //左尻11 左ひざ13
+            //右尻１２　右ひざ14
+            // 腰が下がってる１　あがってる　－１　そもそも見えない　０
+            // 座標20　で感知
+            double threshould = 0.5f;
+            if (a[11].confidence > threshould && a[13].confidence > threshould)
+            {
+                if(a[11].y < (a[13].y + 0.2)){
+                    return 1;
+                }
+                else{
+                    return -1;
+                }
+            }
+            else if (a[12].confidence > threshould && a[14].confidence > threshould)
+            {
+                if(a[12].y < (a[14].y + 0.2)){
+                    return 1;
+                }
+                else{
+                    return -1;
+                }
+            }
+            else{//写ってない
+                return 0;
+            }
+        }
         ///////////////////////////////////////////////////////////////////
 
     }
